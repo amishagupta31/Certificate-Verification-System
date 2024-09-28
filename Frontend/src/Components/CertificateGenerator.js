@@ -1,38 +1,33 @@
 import React, { useState } from 'react';
+import jsPDF from "jspdf";
+import { QRCodeSVG } from "qrcode.react";
+import html2canvas from "html2canvas";
+
 
 export default function CertificateGenerator() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
-  const [domain, setDomain] = useState(''); // New field
-  const [date, setDate] = useState(''); // New field
+  const [domain, setDomain] = useState(''); 
+  const [startdate, setDate] = useState('');
+   const [enddate, setDate] = useState('');
   const[founder,setFounder] =useState('');
-  const [certificate, setCertificate] = useState(null);
+   const [certificateVisible, setCertificateVisible] = useState(false);
+const certificateNumber = Math.random().toString(36).substring(2, 15);
+
   
   const [error, setError] = useState(null); // State to store error messages
 
-  const handleGenerate = async (e) => {
-    e.preventDefault();
-    setError(null); // Reset error before new request
-
-    try {
-      const response = await fetch('http://localhost:5000/api/certificates/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, domain, date }), // Include new fields
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const result = await response.json();
-      setCertificate(result); // Set the received certificate
-      console.log(result);
-    } catch (error) {
-      console.error('Fetch error:', error);
-      setError(error.message); // Set error message to display to the user
-    }
+   const handleDownload = () => {
+    const input = document.getElementById("certificate");
+    html2canvas(input).then((canvas) => {
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF();
+      pdf.addImage(imgData, "PNG", 0, 0, 210, 297);
+      pdf.save("certificate.pdf");
+    });
   };
+
+
 
   return (
     <section className="bg-gradient-to-r from-indigo-300 via-violet-200 to-indigo-300 min-h-screen flex items-center justify-center">
@@ -78,7 +73,7 @@ export default function CertificateGenerator() {
             type="date"
             value={date}
             
-            onChange={(e) => setDate(e.target.value)}
+            onChange={(e) => setstartDate(e.target.value)}
             className="border px-3 py-2 rounded-lg mb-4 w-full"
             required
           />
@@ -86,7 +81,7 @@ export default function CertificateGenerator() {
             type="date"
             value={date}
             
-            onChange={(e) => setDate(e.target.value)}
+            onChange={(e) => setendDate(e.target.value)}
             className="border px-3 py-2 rounded-lg mb-4 w-full"
             required
           />
@@ -95,21 +90,54 @@ export default function CertificateGenerator() {
           <button type="submit" className="bg-indigo-700 text-white px-7 py-2 rounded-lg font-semibold">Generate</button>
           <button type="submit" className="bg-indigo-700 text-white px-7 py-2 rounded-lg ml-4 font-semibold">Download</button>
         </form>
+{/* Certificate layout */}
+        {certificateVisible && (
+          <div className="relative p-7  mt-10 mb-4 w-[800px]  text-center">
+            {/* Outer Border */}
+            <div className="absolute inset-0 rounded-lg border-8 border-indigo-900"></div>
+            {/* Inner Content with Inner Border */}
+            <div
+              id="certificate"
+              className="relative p-8 rounded-lg border-4 border-amber-300"
+              style={{
+                borderRadius: "10px",
+              }}>
+              <p className="absolute text-3xl font-bold text-xs left-2 top-2 text-grey-70">
+                Certificate No: {certificateNumber}
+              </p>
+              <h2 className="text-5xl mt-20 font-bold text-blue-600">
+                CERTIFICATE OF COMPLETION
+              </h2>
+              <p className="text-2xl mt-8">This certifies that</p>
+              <p className="mt-8 text-6xl font-semibold">{name}</p>
+              <p className="mt-6 text-2xl">has completed the course</p>
+              <h3 className="text-4xl mt-8 font-semibold">{course}</h3>
+              {/* Date Range */}
+              <p className="mt-8 font-bold">
+                {startDate} to {endDate}
+              </p>
+              <p className="mt-8 text-2xl">
+                We found him/her sincere,hardworking,dedicated.
+                <br />
+                She/He worked well as part of the team during his/her work.{" "}
+                <br />
+                We take this opportunity to thank him/her and wish him/her all
+                the best for your future.{" "}
+              </p>
+              <div className="mt-18 p-1 ">
+                <QRCodeSVG value={certificateNumber} size={85} />
+              </div>
 
-        
-
-        {certificate && (
-          <div className="min-h-40 bg-white border p-4 flex flex-col items-center mt-4 mb-6 max-w-full"> 
-            <div className="border p-4 rounded-lg shadow-lg bg-white max-w-md mx-auto">
-              <h2 className="text-2xl font-bold text-center">Certificate of Achievement</h2>
-              <p className="mt-4 text-2xl ">This certifies that {certificate.name} has successfully completed the course in {certificate.domain}</p>
-              <p className="mt-4 text-lg">Certificate Number: {certificate.certificateNumber}</p>
-              <img src={certificate.qrCode} alt="QR Code" className="mt-4 mx-auto" />
-              <p className="mt-4 text-sm text-gray-500">Issued on: {new Date(certificate.issuedDate).toLocaleDateString()}</p> {/* Adjusted to use issuedDate */}
-            </div>
+              {/* Right Side: Founder */}
+              <div className="text-right mb-16">
+                <p className="font-bold text-3xl">{founder}</p>
+                <p className="text-2xl  font-bold">Founder</p>
+              </div>
+                </div>
           </div>
         )}
       </div>
+   
     </section>
   );
 }
