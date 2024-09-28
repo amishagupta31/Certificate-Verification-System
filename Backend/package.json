@@ -1,0 +1,12 @@
+{
+  "name": "fullstack2",
+  "version": "1.0.0",
+  "description": "its a normal site",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "manjeet",
+  "license": "ISC",
+  "keywords": []
+}
