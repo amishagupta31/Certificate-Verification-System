@@ -102,6 +102,8 @@ const certificateNumber = Math.random().toString(36).substring(2, 15);
               style={{
                 borderRadius: "10px",
               }}>
+          <img src={logo} alt="Company Logo" className="mb-4 w-32 mx-auto" /> {/* Adjust width as needed */}
+              
               <p className="absolute text-3xl font-bold text-xs left-2 top-2 text-grey-70">
                 Certificate No: {certificateNumber}
               </p>
